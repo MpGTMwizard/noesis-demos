@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ABP Insurance Assistant</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --ink:#141a22; --ink-2:#4a5563; --muted:#7b8694;
+    --line:#e0e5ec; --brand:#123b6d; --brand-2:#2f7ec9; --accent:#1f9d66;
+    --bot:#f1f5fa; --user:#123b6d;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
+    display:flex;flex-direction:column;align-items:center;padding:24px 16px 40px}
+  .demoflag{width:100%;max-width:560px;background:#fff6e5;border:1px solid #e6c168;color:#7a5410;
+    font-size:12px;padding:7px 12px;border-radius:8px;margin-bottom:14px;text-align:center}
+  .app{width:100%;max-width:560px;background:var(--card);border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;box-shadow:0 8px 30px rgba(18,40,70,.10)}
+  .top{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fff, #fbfcfe)}
+  .logo{width:40px;height:40px;border-radius:9px;object-fit:contain;background:#fff;border:1px solid var(--line)}
+  .top h1{font-size:16px;margin:0;letter-spacing:-.01em}
+  .top p{font-size:12px;margin:2px 0 0;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:5px;vertical-align:1px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px 18px 4px}
+  .chip{font-size:11px;color:var(--ink-2);background:var(--bot);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+  .chat{padding:14px 18px;display:flex;flex-direction:column;gap:10px;min-height:280px;max-height:52vh;overflow-y:auto}
+  .msg{max-width:80%;padding:10px 13px;border-radius:14px;font-size:14px;animation:pop .18s ease}
+  .msg.bot{background:var(--bot);color:var(--ink);align-self:flex-start;border-bottom-left-radius:5px}
+  .msg.me{background:var(--user);color:#fff;align-self:flex-end;border-bottom-right-radius:5px}
+  .msg.note{align-self:center;background:none;color:var(--accent);font-size:12.5px;font-weight:600;padding:2px}
+  @keyframes pop{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .actions{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px 18px;border-top:1px solid var(--line)}
+  button.opt{font-family:inherit;font-size:13.5px;color:var(--brand);background:#fff;border:1.5px solid var(--brand-2);
+    border-radius:10px;padding:9px 14px;cursor:pointer;transition:.12s}
+  button.opt:hover{background:var(--brand);color:#fff}
+  button.opt:disabled{opacity:.4;cursor:default}
+  .foot{max-width:560px;font-size:11.5px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5}
+  .foot b{color:var(--ink-2)}
+  .typing{display:inline-flex;gap:3px}.typing i{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:b 1s infinite}
+  .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+  @keyframes b{0%,60%,100%{opacity:.3}30%{opacity:1}}
+</style>
+</head>
+<body>
+  <div class="demoflag">Interactive demo built for ABP Insurance by Noesis AI. Not a live policy system.</div>
+  <div class="app">
+    <div class="top">
+      <img class="logo" src="https://irp.cdn-website.com/27744ee9/dms3rep/multi/opt/abp-insurance-social-icon-1920w.png" alt="ABP Insurance" onerror="this.style.display='none'">
+      <div>
+        <h1>ABP Insurance</h1>
+        <p><span class="dot"></span>Certificate &amp; service assistant</p>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip">Commercial</span><span class="chip">Workers Comp</span><span class="chip">General Liability</span>
+      <span class="chip">Commercial Auto</span><span class="chip">Property</span><span class="chip">Bonds &amp; Surety</span>
+    </div>
+    <div class="chat" id="chat"></div>
+    <div class="actions" id="actions"></div>
+  </div>
+  <p class="foot">This assistant handles the request instantly instead of it sitting in an inbox. In the live version it emails the certificate and logs it to your system automatically, with <b>zero staff time</b>.<br>Built by Noesis AI.</p>
+
+<script>
+  const chat=document.getElementById('chat'), actions=document.getElementById('actions');
+  const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
+  function bubble(text,cls){const d=document.createElement('div');d.className='msg '+cls;d.textContent=text;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;return d;}
+  async function bot(text){const t=document.createElement('div');t.className='msg bot';t.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';chat.appendChild(t);chat.scrollTop=chat.scrollHeight;await wait(650);t.remove();bubble(text,'bot');}
+  function opts(list){actions.innerHTML='';list.forEach(o=>{const b=document.createElement('button');b.className='opt';b.textContent=o.label;b.onclick=o.go;actions.appendChild(b);});}
+  function note(text){bubble(text,'note');}
+
+  async function start(){
+    await bot("Hi, I'm the ABP Insurance assistant. I can send a certificate of insurance in under a minute, or answer a quick coverage question. What do you need?");
+    opts([{label:"Request a certificate (COI)",go:coiHolder},{label:"Ask a question",go:ask}]);
+  }
+  async function coiHolder(){bubble("Request a certificate (COI)","me");opts([]);await bot("Happy to help. Who needs to be listed as the certificate holder?");
+    opts([{label:"A landlord / property manager",go:()=>coiPolicy("landlord")},{label:"A client or general contractor",go:()=>coiPolicy("client")},{label:"A vendor / event venue",go:()=>coiPolicy("vendor")}]);}
+  async function coiPolicy(who){bubble(who==="landlord"?"A landlord / property manager":who==="client"?"A client or general contractor":"A vendor / event venue","me");opts([]);
+    await bot("Got it. Which coverage should the certificate show?");
+    opts([{label:"General Liability",go:()=>coiSend("General Liability")},{label:"Workers Comp",go:()=>coiSend("Workers Comp")},{label:"Commercial Auto",go:()=>coiSend("Commercial Auto")}]);}
+  async function coiSend(pol){bubble(pol,"me");opts([]);await bot("And where should we send it?");
+    opts([{label:"Email it to me",go:()=>coiDone(pol)},{label:"Send straight to the holder",go:()=>coiDone(pol)}]);}
+  async function coiDone(pol){bubble("Email it to me","me");opts([]);
+    await bot("Done. Your "+pol+" certificate is generated, logged, and on its way.");
+    note("Handled in 40 seconds, no staff time.");
+    await bot("In ABP's live version this fires the email instantly and updates your management system automatically. Want to see how a coverage question is handled too?");
+    opts([{label:"Yes, ask a question",go:ask},{label:"Start over",go:reset}]);}
+  async function ask(){bubble("Ask a question","me");opts([]);await bot("Ask away. For example, a client wants to know if their policy covers a subcontractor.");
+    opts([{label:"Does GL cover subcontractors?",go:answer},{label:"Start over",go:reset}]);}
+  async function answer(){bubble("Does our GL policy cover subcontractors?","me");opts([]);
+    await bot("Good question, and this is the line we keep on the safe side. The assistant captures the question, pulls the relevant policy on file, and routes it to a licensed agent at ABP with the context attached, so the client gets a fast, accurate answer without a producer chasing the file. It never gives coverage advice itself.");
+    note("Intake and routing, never advice.");
+    opts([{label:"Start over",go:reset}]);}
+  function reset(){chat.innerHTML='';start();}
+  start();
+</script>
+</body>
+</html>
